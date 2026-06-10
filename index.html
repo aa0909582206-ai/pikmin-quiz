@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>職場皮克敏屬性測驗 ── 15題職場極致修煉版</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+
+        .cute-title {
+            font-size: 38px;
+            font-family: 'Iansui', 'PingFang TC', sans-serif;
+            color: #2d3748; 
+            text-shadow: 1px 1px 0px #ffffff;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        @media (max-width: 640px) {
+            .cute-title { font-size: 28px; }
+        }
+
+        /* 皮克敏圖片浮動可愛動畫 */
+        @keyframes bounceShort {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-bounce-short {
+            animation: bounceShort 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-pink-100/40 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <header class="bg-white border-b border-slate-100 p-6 text-center shadow-xs">
+        <h1 class="cute-title tracking-wide">🌱 職場皮克敏屬性測驗 ── 15題職場極致修煉版</h1>
+        <p class="text-emerald-600 text-xs font-semibold tracking-widest uppercase mt-2">✨ MBTI 轉譯 ── 測出你的 AI 時代不可替代度 ✨</p>
+    </header>
+
+    <main class="flex-grow container mx-auto max-w-[650px] p-6 flex flex-col justify-center">
+
+        <div id="start-card" class="bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100 flex flex-col justify-between">
+            <div>
+                <div class="text-6xl mb-4 mt-2">🚀</div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-4">你是哪一種神祕皮克敏？</h2>
+                <p class="text-slate-600 mb-8 text-base leading-relaxed text-left bg-slate-50 p-5 rounded-xl border border-dashed border-slate-200">
+                    本測驗已升級為 **15 題極致沉浸情境**。從引進 AI...考驗你在職場食物鏈最真實的反射動作。系統後台將即時跑動皮克敏多維演算法，準備好接受考驗了嗎？
+                </p>
+            </div>
+            <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition duration-200 cursor-pointer text-lg mb-2">
+                進入 15 題沉浸式職場情境 ➔
+            </button>
+        </div>
+
+        <div id="quiz-card" class="hidden bg-white rounded-2xl shadow-xl p-8 border border-slate-100 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-semibold text-emerald-600 tracking-wider" id="question-counter">題數 1 / 15</span>
+                    <span class="text-xs text-slate-400" id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full mb-6">
+                    <div id="progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+
+                <div class="inline-block bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-md mb-3" id="question-tag">
+                    情境載入中...
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 mb-6 leading-snug" id="question-text">
+                    題目載入中...
+                </h3>
+            </div>
+
+            <div class="space-y-3.5 mb-2" id="options-container">
+            </div>
+        </div>
+
+        <div id="result-card" class="hidden bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+            <div class="text-center mb-4">
+                <span class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full uppercase tracking-wider">AI 綜合認證報告</span>
+            </div>
+
+            <div class="text-center mb-6">
+                <div id="result-avatar" class="text-6xl mb-2 hidden">🎭</div>
+                
+                <div id="result-image-container" class="flex justify-center mb-4">
+                </div>
+                <h2 id="result-title" class="text-2xl font-extrabold text-slate-800">首席分析官</h2>
+                <div id="result-tags" class="flex flex-wrap justify-center gap-1.5 mt-3"></div>
+            </div>
+
+            <hr class="border-slate-100 my-4">
+
+            <div class="mb-6 bg-slate-50 p-4 rounded-xl flex justify-center">
+                <canvas id="radarChart" class="max-w-[400px] w-full"></canvas>
+            </div>
+
+            <div class="space-y-4 text-sm leading-relaxed">
+                <div class="bg-emerald-50/80 p-4 rounded-xl border border-emerald-100">
+                    <h4 class="font-bold text-emerald-800 mb-1">📈 時代優勢分析</h4>
+                    <p id="advantage-text" class="text-slate-700"></p>
+                </div>
+
+                <div class="bg-rose-50/80 p-4 rounded-xl border border-rose-100">
+                    <h4 class="font-bold text-rose-800 mb-1">⚠️ 職場雷區提示</h4>
+                    <p id="mine-text" class="text-slate-700"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4 text-xs">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <span class="block text-slate-400 font-medium mb-1">🤝 最佳搬運夥伴</span>
+                    <span id="best-partner" class="font-bold text-slate-700 text-sm"></span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <span class="block text-slate-400 font-medium mb-1">👾 遭遇大嘴怪請呼叫</span>
+                    <span id="worst-enemy" class="font-bold text-slate-700 text-sm"></span>
+                </div>
+            </div>
+
+            <div class="mt-6 space-y-2">
+                <button onclick="window.print();" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow transition duration-200 cursor-pointer text-center block text-sm">
+                    💾 長按螢幕或點擊儲存圖卡
+                </button>
+                <button onclick="restartGame()" class="w-full bg-white hover:bg-slate-50 text-slate-600 font-medium py-2 px-4 rounded-xl text-xs transition duration-200 cursor-pointer border border-slate-200">
+                    再測一次 ↺
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center p-4 text-xs text-slate-400 border-t border-slate-100 bg-white">
+        © 2026 職場皮克敏心理測驗小組 ── 15題多維度計分旗艦版
+    </footer>
+
+    <script>
+        const quizData = [
+            {
+                tag: "情境 1（技術應變與流程適應）",
+                question: "公司突然引進全新 AI 自動化系統，結果異常導致歷史「設備追蹤清單與公文」編號大亂，主管催要報表時，你的反應是？",
+                options: [
+                    { text: "拉出舊備份，啟動嚴謹的 Excel 函數手動逐筆校對，確保 100% 零失誤。", scores: { purple: 3, white: 2 } },
+                    { text: "上網找原始碼或對著 AI 詠唱，試圖寫出自動化腳本批次修復，邊試邊調。", scores: { yellow: 3, red: 2 } },
+                    { text: "直接去找 IT 主管或系統廠商開火，要求立刻給出合理的交代與搶修時程。", scores: { red: 3, white: 1 } },
+                    { text: "先安撫焦慮的主管和崩潰的同事，叫大家喝杯咖啡，討論怎麼分工度過難關。", scores: { blue: 3, purple: 1 } }
+                ]
+            },
+            {
+                tag: "情境 2（衝突管理與人際溝通）",
+                question: "隔壁部門交接出現慢速或嚴重疏失，導致你負責的專案進度卡關，眼看結案死線就要到了，你會？",
+                options: [
+                    { text: "帶著失誤證據直接敲對方大門釐清責任：「這是你們的疏失，請今天處理好。」", scores: { red: 3, white: 1 } },
+                    { text: "私下約對方承辦人喝咖啡，溫柔地說：「我知道你們很忙，但這卡住了，一起看看怎麼解決？」", scores: { blue: 3, purple: 1 } },
+                    { text: "繞過承辦人，直接把「時間點、數據證明、影響範圍」做成精美報告同步 CC 給雙方大老闆。", scores: { white: 3, purple: 2 } },
+                    { text: "管他的，既然常規走不通，立刻想一個非傳統的替代備案（方案C）繞過這條卡住的線。", scores: { yellow: 3, red: 1 } }
+                ]
+            },
+            {
+                tag: "情境 3（會議突發狀況處理）",
+                question: "在重要的大型提案會議上，大老闆突然眉頭一皺，指出你簡報第 5 頁一個非核心的數據跟他的印象不符，你會？",
+                options: [
+                    { text: "一秒拉出後台歷史數據與 reference 資料來源，有條不紊地向老闆證實這個數據的正確性。", scores: { white: 3, purple: 2 } },
+                    { text: "立刻認錯：「不好意思這是我的疏忽，我會後 10 分鐘內修正發給您。」並展現高 EQ 微笑。", scores: { blue: 3, purple: 1 } },
+                    { text: "順著老闆的話延伸：「老闆您看得很細！如果用您的觀點看，未來還會有 X、Y 兩種全新策略可能性...」", scores: { yellow: 3, red: 1 } },
+                    { text: "直接捍衛論點：「這個數字是經過三方驗證的，它反映了目前的真實問題，我們必須正視它。」", scores: { red: 3, white: 1 } }
+                ]
+            },
+            {
+                tag: "情境 4（當團隊方向混亂時）",
+                question: "部門今年換了新主管，每週開會策略都變來變去，團隊成員都開始私下抱怨、無所適從，此時你會？",
+                options: [
+                    { text: "建立一個「變動追蹤表」，把主管講過的每個版本、時間點 and 矛盾處白紙黑字記下來自保。", scores: { purple: 3, white: 2 } },
+                    { text: "自告奮勇當溝通橋樑，下班找主管吃飯探口風，幫大家摸清主管背後真正的核心意圖與脾氣。", scores: { blue: 3, yellow: 1 } },
+                    { text: "在跨部門大會或內部週會上直接舉手提問：「主管，這跟上週的決策矛盾，請問衡量指標到底是什麼？」", scores: { red: 3, white: 1 } },
+                    { text: "太好笑了！這正合我意，反正計畫趕不上變化，我就每週提不一樣的瘋狂點子測試主管底線。", scores: { yellow: 3, blue: 1 } }
+                ]
+            },
+            {
+                tag: "情境 5（面對甩鍋文化）",
+                question: "一個跨部門的大型專案結案後成效不佳，其他部門的主管開始在跨部門郵件中明示、暗示是你這邊執行不力，你會？",
+                options: [
+                    { text: "直接回信（Reply All），用條列式、精準到幾點幾分的對話截圖 and 進度時間軸，正面迎擊打臉對方。", scores: { red: 3, white: 2 } },
+                    { text: "把所有當初簽核的文件、會辦單、合約盲點重新打包整理，做成滴水不漏的防禦報告呈報大老闆。", scores: { white: 3, purple: 2 } },
+                    { text: "私下聯絡關係好的跨部門盟友，搞清楚是誰在背後帶風向，用人際網路化解這場政治危機。", scores: { blue: 3, yellow: 1 } },
+                    { text: "不浪費時間內耗，直接發一份「全面數位轉型/優化改善檢討大綱」把大家的焦點拉向未來。", scores: { yellow: 3, red: 1 } }
+                ]
+            },
+            {
+                tag: "情境 6（緊急危機處理）",
+                question: "週五下午 17:50 準備打卡下班時，客戶突然打電話來暴怒咆哮，說系統出了大包，今天不解決就要解約，你會？",
+                options: [
+                    { text: "冷靜一秒，按照系統標準異常排除指南（SOP），留下來調閱 log，逐行排查到底是哪裡失火。", scores: { purple: 3, white: 2 } },
+                    { text: "發揮超強安撫技巧，開啟語音狂點頭：「非常理解您的心情！」先陪笑承擔情緒，爭取到週一緩衝時間。", scores: { blue: 3, yellow: 1 } },
+                    { text: "立刻跳進去跟客戶一起腦力激盪，不走常規修復，改用一個奇特、創新的外掛繞過方法先幫他止血。", scores: { yellow: 3, red: 1 } },
+                    { text: "直接把工程師、PM 全體拉回會議室，高調指揮：「大家把包包放下！今天不搞定誰都不准走！」", scores: { red: 3, purple: 1 } }
+                ]
+            },
+            {
+                tag: "情境 7（日常工作節奏）",
+                question: "你最理想、也最能發揮最高戰鬥力的日常工作狀態是？",
+                options: [
+                    { text: "在固定時間點精準處理固定公文與收發，一切按步就班、高度討厭突發插單。", scores: { purple: 3, white: 1 } },
+                    { text: "桌上有三螢幕，一個看數據、一個抓 Bug、一個對文件，隱藏在後方用超強個人能力解決繁瑣問題。", scores: { white: 3, purple: 1 } },
+                    { text: "在開放空間跟不同專案的人瘋狂交流、開會、做高調提案，喜歡在第一線引人注目。", scores: { red: 3, yellow: 2 } },
+                    { text: "戴著耳機天馬行空地畫著心智圖或者是詠唱 AI，沒有固定規律，享受突發奇想的快感。", scores: { yellow: 3, blue: 1 } }
+                ]
+            },
+            {
+                tag: "情境 8（專案資源不足時）",
+                question: "老闆丟給你一個預算砍半、人力只有一人、但時程還要提前的「不可能任務」，你的起手式是？",
+                options: [
+                    { text: "直接跟老闆據理力爭，拿出行事曆與人力成本精算表：「這資源絕對做不到，請給我合理的配備。」", scores: { red: 3, white: 1 } },
+                    { text: "把 AI 工具開到最大，自己一個人默默熬夜用自動化、指令和巨集把任務硬生生槓桿出來。", scores: { purple: 3, yellow: 2 } },
+                    { text: "透過在公司的好人緣，跨部門到處去借調實習生、挪用別人沒用完的資源來湊齊神隊友。", scores: { blue: 3, yellow: 1 } },
+                    { text: "打破原本的專案範疇（Scope），重新包裝成另一個「輕量級實驗概念性產品」丟出去唬住市場。", scores: { yellow: 3, purple: 1 } }
+                ]
+            },
+            {
+                tag: "情境 9（接受意見回饋）",
+                question: "同事在你精心設計的成品裡，發現了一個低級但嚴重的邏輯漏洞（Bug），並當眾向你指出，你會？",
+                options: [
+                    { text: "外表淡定內心震驚，立刻開啟除錯模式，探究他發現的漏洞深水區還有沒有藏其他隱患。", scores: { white: 3, purple: 2 } },
+                    { text: "完全不尷尬，大方拍手讚賞：「天啊你太強了！還好有你救了我，這團隊有你真好！」", scores: { blue: 3, yellow: 1 } },
+                    { text: "雖然丟臉，但立刻啟動大腦防禦與應變直覺，把這個漏洞重新包裝成「我故意留下的實驗分支」。", scores: { yellow: 3, red: 1 } },
+                    { text: "坦然接受，但會私下追問他是用什麼方法抓出來的，確保自己未來的系統規則能夠堵住這個洞。", scores: { purple: 3, white: 1 } }
+                ]
+            },
+            {
+                tag: "情境 10（跨部門溝通卡關）",
+                question: "跨部門開會時，雙方各執一詞，會議陷入死寂，每個人都在看手機、氣氛降到冰點，此時你會？",
+                options: [
+                    { text: "講個職場笑話或自嘲打破沉默：「大家不要這麼嚴肅嘛，今天點外送飲料我請客，先放鬆一下。」", scores: { blue: 3, yellow: 1 } },
+                    { text: "打破沉默，直接站起來在白板上畫出雙方的爭執盲點對比圖，用冰冷的邏輯與數字強迫大家面對。", scores: { white: 3, red: 1 } },
+                    { text: "大膽拋出一個完全沒人想過的「第三條瘋狂路徑」，徹底推翻前面的爭執框架，重新討論。", scores: { yellow: 3, blue: 1 } },
+                    { text: "直接拍桌或強勢表態：「這樣耗下去不是辦法，我提議現在投票，或者直接請大老闆決斷！」", scores: { red: 3, purple: 1 } }
+                ]
+            },
+            {
+                tag: "情境 11（個人學習與進修）",
+                question: "公司提供了一筆年度進修補助金，你可以自由選擇一門課，你最可能選哪類？",
+                options: [
+                    { text: "《極致 Excel 與大型資料庫自動化風控實戰：從基礎到高階除錯》", scores: { white: 3, purple: 2 } },
+                    { text: "《高難度利害關係人談判與深水區職場高 EQ 人際協調學》", scores: { blue: 3, purple: 1 } },
+                    { text: "《前沿 AI 詠唱藝術與未來商業模式天馬行空創新發想營》", scores: { yellow: 3, red: 1 } },
+                    { text: "《目標導向專案執行力：如何在最短時間內帶領團隊高效衝鋒》", scores: { red: 3, yellow: 1 } }
+                ]
+            },
+            {
+                tag: "情境 12（工作環境的選擇）",
+                question: "如果可以自由選擇座位與工作型態，你最希望？",
+                options: [
+                    { text: "有厚重隔音屏風的安靜角落，桌上東西必須依照格線整齊排列，按我的節奏產出。", scores: { purple: 3, white: 1 } },
+                    { text: "坐在團隊的正中央，所有人抬頭就能看到我，方便隨時交流、隨時開火推進進度。", scores: { red: 3, blue: 1 } },
+                    { text: "完全在家遠端（WFH），只要給我一條高頻寬網路，我能一隻手對抗全世界的系統 Bug。", scores: { white: 3, yellow: 1 } },
+                    { text: "流動式工位或每天去不同的文青咖啡廳，身邊環境越有變化，我的靈感就越源源不絕。", scores: { yellow: 3, blue: 2 } }
+                ]
+            },
+            {
+                tag: "情境 13（面對新任務時）",
+                question: "主管突然在群組發了一條極度模糊的指令：「這禮拜我們來研究一下如何把業務與 Web3 結合，大家提個想法。」你會？",
+                options: [
+                    { text: "立刻興奮地用語音丟出 5 個最前衛、最新潮、雖然不知道能不能賺錢但絕對酷炫的點子。", scores: { yellow: 3, blue: 1 } },
+                    { text: "冷靜下來，上網搜集所有因 Web3 糾紛或破產的商業歷史案例，做成一份『合規與風險分析報告』給主管。", scores: { white: 3, purple: 2 } },
+                    { text: "先去問問別家公司怎麼做的，參考成熟的同業歷史數據，整理出幾條穩健的漸進式 SOP。", scores: { purple: 3, white: 1 } },
+                    { text: "直接在群組回覆：「收到，我今天下班前先出一份初步的行動企劃大綱，下週一直接落地執行。」", scores: { red: 3, yellow: 1 } }
+                ]
+            },
+            {
+                tag: "情境 14（當團隊成員犯錯時）",
+                question: "你帶領的後輩因為粗心把未測試的程式碼/文件發給了重要大客戶，造成客戶微詞，你會？",
+                options: [
+                    { text: "主動站到最前面向客戶致歉、承擔責任，展現高超交涉手腕，幫後輩把子彈全部擋下來。", scores: { blue: 3, red: 1 } },
+                    { text: "一邊善後，一邊命令後輩留下來，徹夜檢討並建立「出貨防呆檢核清單（SOP）」，保證不會有下一次。", scores: { purple: 3, white: 2 } },
+                    { text: "冷酷但精準地對後輩指出：「這是低級錯誤。你的盲點在於 X 跟 Y，請立刻去給我修正。」", scores: { red: 3, white: 2 } },
+                    { text: "對後輩說：「別沮喪，這是一個很好的實驗教訓！我們來想想怎麼把這個錯誤轉化為產品新特色？」", scores: { yellow: 3, blue: 1 } }
+                ]
+            },
+            {
+                tag: "情境 15（關於下班這件事）",
+                question: "下班時間到了，事情做得差不多，但全辦公室包括大老闆都還死沉沉地坐在原位加班，你會？",
+                options: [
+                    { text: "時間到優雅收拾包包，微笑跟大家說再見，準時神話延續，內心毫無波瀾。", scores: { purple: 3, white: 1 } },
+                    { text: "大聲地問周圍的人：「大家還好嗎？需不需要幫忙買宵夜或點飲料？」順便用歡樂語調打破沉悶氣氛。", scores: { blue: 3, yellow: 1 } },
+                    { text: "故意走去老闆桌前高調回報：「老闆，我今天負責的專案進度超前 20%，那我先回去囉！」", scores: { red: 3, yellow: 1 } },
+                    { text: "繼續留著，但其實是在偷偷研究自己的 AI 詠唱、寫自己的個人專案，外表看起來像在為公司拼命。", scores: { white: 3, yellow: 2 } }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userScores = { red: 0, blue: 0, yellow: 0, purple: 0, white: 0 };
+        let radarChartInstance = null;
+
+        function startGame() {
+            document.getElementById('start-card').classList.add('hidden');
+            document.getElementById('quiz-card').classList.remove('hidden');
+            currentQuestionIndex = 0;
+            userScores = { red: 0, blue: 0, yellow: 0, purple: 0, white: 0 };
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const currentQuiz = quizData[currentQuestionIndex];
+
+            const progressPercent = Math.round(((currentQuestionIndex) / quizData.length) * 100);
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('progress-percent').innerText = `${progressPercent}%`;
+            document.getElementById('question-counter').innerText = `題數 ${currentQuestionIndex + 1} / ${quizData.length}`;
+
+            document.getElementById('question-tag').innerText = currentQuiz.tag;
+            document.getElementById('question-text').innerText = currentQuiz.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            currentQuiz.options.forEach((option) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-50 hover:bg-slate-100 active:bg-emerald-50 p-4 rounded-xl border border-slate-200 transition duration-150 cursor-pointer text-sm leading-relaxed shadow-xs block";
+                btn.innerText = option.text;
+                btn.onclick = () => selectOption(option.scores);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(scores) {
+            for (let color in scores) {
+                userScores[color] += scores[color];
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('result-card').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = '100%';
+            document.getElementById('progress-percent').innerText = '100%';
+
+            let maxColor = 'white';
+            let maxScore = -1;
+            for (let color in userScores) {
+                if (userScores[color] > maxScore) {
+                    maxScore = userScores[color];
+                    maxColor = color;
+                }
+            }
+
+            const pikminDatabase = {
+                white: {
+                    title: "自帶防毒面具的白色皮克敏",
+                    avatar: "<img src=\"content/IMG_4989.PNG\" alt=\"白色皮克敏\" style=\"width: 100px; height: 100px; object-fit: contain;\">",
+                    imageSrc: "content/IMG_4989.PNG",
+                    tags: ["#Excel盲點秒殺器", "#外表看似無害細心過於常人", "#準時下班的風控之眼"],
+                    advantage: "在 AI 時代，你是不可或缺的白色屬性。當別人盲目相信 AI 生成的數據或落入精美簡報的陷阱時，只有你那敏銳的雙眼能一眼看穿合約或流程裡隱藏的『毒點（Bug）』。你不是行政機器，你是高階的職場除錯大師與隱形風控核心。",
+                    mine: "注意：有時過度追求完美與自我防禦，會讓你卡在細節裡不敢大膽推進（紫/白特質）。當面對快速變動的藍海市場時，試著像黃色皮克敏一樣『飛高一點』看大局！",
+                    partner: "黃色皮克敏（行銷創意擔當）",
+                    enemy: "藍色皮克敏（潛水溝通大師）"
+                },
+                purple: {
+                    title: "重量級大牛紫色皮克敏",
+                    avatar: "<img src=\"content/IMG_4988.PNG\" alt=\"紫色皮克敏\" style=\"width: 100px; height: 100px; object-fit: contain;\">",
+                    imageSrc: "content/IMG_4988.PNG",
+                    tags: ["#一人抵十人", "#嚴謹準時神話", "#核心流程壓艙石"],
+                    advantage: "你是團隊中最強大的後援與穩定力量。你對規則、歷史數據與設備清單瞭若指掌。當面對排山倒海的繁瑣文件與突發任務時，你那教科書般的嚴謹 SOP 邏輯能讓混亂的現場瞬間重回正軌，是真正的一人抵十人重量級大牛。",
+                    mine: "注意：當計畫被外部臨時更改、或者遭遇沒有前例可循的狀況時，容易產生排斥感。保持穩健的同時，容許一點點彈性會讓你更具侵略性！",
+                    partner: "藍色皮克敏（高 EQ 協調者）",
+                    enemy: "黃色皮克敏（天馬行空大師）"
+                },
+                red: {
+                    title: "熱血衝鋒的紅色皮克敏",
+                    avatar: "<img src=\"content/IMG_4976.PNG\" alt=\"紅色皮克敏\" style=\"width: 100px; height: 100px; object-fit: contain;\">",
+                    imageSrc: "content/IMG_4976.PNG",
+                    tags: ["#高調提案機", "#直面對決毒點", "#超強戰鬥執行力"],
+                    advantage: "你擁有全團隊中最強大的衝鋒執行力與破局能力。對事不對人，當專案卡關 or 權益受損時，你敢於站在第一線直接開火、抓出毒點、釐清責任，是團隊突破僵局、拿下新客戶不可或缺的重裝攻擊武器。",
+                    mine: "注意：直線條、高能量的溝通有時會燙傷周圍心思細膩的夥伴。衝鋒陷陣之餘，記得回頭確認後方行政與數據補給是否跟上，才不會流於孤軍奮戰。",
+                    partner: "紫色皮克敏（穩健後援大師）",
+                    enemy: "藍色皮克敏（溫和協調派）"
+                },
+                yellow: {
+                    title: "天馬行空的黃色皮克敏",
+                    avatar: "<img src=\"content/IMG_4981.PNG\" alt=\"黃色皮克敏\" style=\"width: 100px; height: 100px; object-fit: contain;\">",
+                    imageSrc: "content/IMG_4981.PNG",
+                    tags: ["#跳脫框架狂人", "#AI詠唱大師", "#隨機應變享受者"],
+                    advantage: "你天生自帶高敏捷與高能量，不喜歡被舊有的死板規則束縛。面對新科技或者是突發大包時，你最擅長跳脫框架，邊試邊調，用驚人的直覺、聯想力與創新的非傳統方法找出解決方案，是團隊的創意發想機。",
+                    mine: "注意：過於發散的思維與隨興的節奏，容易讓落地的行政與 SOP 出現斷層。記得適時呼叫穩健、細心的夥伴幫你收尾與建立防呆機制。",
+                    partner: "白色皮克敏（細心除錯大師）",
+                    enemy: "紫色皮克敏（嚴謹規範守護者）"
+                },
+                blue: {
+                    title: "水深區生存的藍色皮克敏",
+                    avatar: "<img src=\"content/IMG_4987.PNG\" alt=\"藍色皮克敏\" style=\"width: 100px; height: 100px; object-fit: contain;\">",
+                    imageSrc: "content/IMG_4987.PNG",
+                    tags: ["#高EQ協調大師", "#以人為本調溫器", "#團隊氣氛守護者"],
+                    advantage: "你是團隊裡的超強護航者與核心調和劑。在跨部門衝突或交接失誤的危機時刻，你總能以人為本，先透過高超的 EQ 調整水溫、承擔情緒，在歡樂不傷和氣的氛圍下解決最難搞的政治問題，在深水區生存力極強。",
+                    mine: "注意：有時太在乎大家的「開不開心」與團隊氣氛，會讓你承受過多的行政與溝通壓力、甚至被道德綁架。記得勇敢畫出工作底線，適時呼叫強勢夥伴幫你開火。",
+                    partner: "紅色皮克敏（敢言衝鋒隊長）",
+                    enemy: "白色皮克敏（冰冷風險防禦官）"
+                }
+            };
+
+            const result = pikminDatabase[maxColor];
+
+            document.getElementById('result-image-container').innerHTML = `
+                <img src="${result.imageSrc}" 
+                     alt="${result.title}" 
+                     class="w-[100px] h-[100px] object-contain drop-shadow-xl animate-bounce-short">
+            `;
+            
+            document.getElementById('result-avatar').innerHTML = result.avatar;
+            document.getElementById('result-title').innerText = result.title;
+
+            const tagsContainer = document.getElementById('result-tags');
+            tagsContainer.innerHTML = '';
+            result.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = "bg-slate-50 text-emerald-700 text-xs px-2.5 py-1 rounded-md font-medium shadow-xs border border-slate-200";
+                span.innerText = tag;
+                tagsContainer.appendChild(span);
+            });
+
+            document.getElementById('advantage-text').innerText = result.advantage;
+            document.getElementById('mine-text').innerText = result.mine;
+            document.getElementById('best-partner').innerText = result.partner;
+            document.getElementById('worst-enemy').innerText = result.enemy;
+
+            const ctx = document.getElementById('radarChart').getContext('2d');
+
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['執行力 (紅)', '溝通力 (藍)', '創新力 (黃)', '抗壓性 (紫)', '細心度 (白)'],
+                    datasets: [{
+                        label: '你的搬運大師潛力指標',
+                        data: [
+                            userScores.red + 1,
+                            userScores.blue + 1,
+                            userScores.yellow + 1,
+                            userScores.purple + 1,
+                            userScores.white + 1
+                        ],
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestMin: 0,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function restartGame() {
+            document.getElementById('result-card').classList.add('hidden');
+            document.getElementById('start-card').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
